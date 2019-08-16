@@ -1,0 +1,16 @@
+{{- if and .Values.azure.enabled .Values.azure.createLogPVC -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-150"
+  name: {{ .Values.webScheduler.logsVolumeClaim }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: do-block-storage 
+  resources:
+    requests:
+      storage: {{ .Values.logVolume.size }}
+{{- end -}}

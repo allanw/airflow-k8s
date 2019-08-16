@@ -1,0 +1,33 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: airflow-scheduler-cleaner
+  labels:
+    application: airflow-scheduler-cleaner
+    version: "0.2"
+spec:
+  schedule: "1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            application: airflow-scheduler-cleaner
+            version: "0.2"
+        spec:
+          serviceAccountName: airflow-rbac
+          restartPolicy: OnFailure
+          containers:
+          - name: cleaner
+            image: "dtzar/helm-kubectl"
+            command: 
+              - /bin/bash
+              - -c
+              - POD_NAME=$(kubectl get pods -l "app=airflow,tier=scheduler" -o jsonpath="{.items[0].metadata.name}"); kubectl delete pod $POD_NAME
+            resources:
+              limits:
+                cpu: 200m
+                memory: 100Mi
+              requests:
+                cpu: 50m
+                memory: 50Mi
